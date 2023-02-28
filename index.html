@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> Theo dõi sức khỏe MQTT </title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta charset="utf-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+    <script type = "text/javascript" language = "javascript">
+	 	var max,at_OK;
+	    function makeid() 
+	    {
+		  var text = "";
+		  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+		  for (var i = 0; i < 5; i++)
+		    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+		  return text;
+		}
+	 	// Create a client instance
+		var client = new Paho.MQTT.Client("broker.hivemq.com", 8000, makeid());
+
+		// set callback handlers
+		client.onConnectionLost = onConnectionLost;
+		client.onMessageArrived = onMessageArrived;
+
+		var options = {
+		    useSSL: false,
+		    userName: "",
+		    password: "",
+		    onSuccess:onConnect,
+		    onFailure:doFail
+		 }
+
+        
+        console.log("Connect to broker.hivemq.com:8000");
+		// connect the client
+		client.connect(options);
+
+		 function doFail(e){
+		    console.log(e);
+		 }
+
+		function onConnect() //sự kiên kết nối thành công
+		{
+		  console.log("Connect OK");
+		  client.subscribe("HeartBeat__DTI"); //đăng kí kênh 
+		  client.subscribe("SpO2__DTI");
+		  client.subscribe("Temp__DTI");
+		}
+
+		// called when the client loses its connection
+		function onConnectionLost(responseObject) 
+		{
+		  if (responseObject.errorCode !== 0) 
+		  {
+		    console.log(responseObject.errorMessage);
+		  }
+		}
+
+		// called when a message arrives
+		function onMessageArrived(message) 
+		{
+		  console.log(message.destinationName + ":" +message.payloadString);
+		  document.getElementById(message.destinationName).innerHTML = message.payloadString;
+		  //document.getElementById("Gas_DTI").innerHTML = message.payloadString;
+		}
+		function public (topic,data)
+	      {
+	        message = new Paho.MQTT.Message(data);
+	        message.destinationName = topic;
+	        client.send(message);
+	      }
+    </script>
+</head>
+<body>
+<h1 align="center"> Theo dõi sức khỏe - MQTT </h1>
+<table align="center">
+	<tr>
+		<th><img src="heartbeat.png" style="width:120px;height:120px;"></th>
+		<th><h2 align="center" style="width:100px; color:blue" id="HeartBeat__DTI"> ... </h2></th>
+		<th><h2> bpm </h2></th>
+	</tr>
+	<tr>
+		<th><img src="spo2.png" style="width:120px;height:120px;"></th>
+		<th><h2 align="center" style="color:red" id="SpO2__DTI"> ... </h2></th>
+		<th><h2> % </h2></th>
+	</tr>
+	<tr>
+		<th><img src="temp.png" style="width:120px;height:120px;"></th>
+		<th><h2 align="center" style="color:green" id="Temp__DTI"> ... </h2></th>
+		<th><h2> °C </h2></th>
+</table>
+</body>
+</html>
