@@ -18,14 +18,14 @@
 		  return text;
 		}
 	 	// Create a client instance
-		var client = new Paho.MQTT.Client("broker.hivemq.com", 8000, makeid());
+		var client = new Paho.MQTT.Client("wss://broker.hivemq.com", 8000, makeid());
 
 		// set callback handlers
 		client.onConnectionLost = onConnectionLost;
 		client.onMessageArrived = onMessageArrived;
 
 		var options = {
-		    useSSL: true,
+		    useSSL: false,
 		    userName: "",
 		    password: "",
 		    onSuccess:onConnect,
